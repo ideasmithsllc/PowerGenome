@@ -359,6 +359,10 @@ def main(**kwargs):
                         "wacc_real": "WACC",
                     }
                 )
+
+                # nlaws 24.09.11 hack for dropping duplicate columns with all NaN (['WACC', 'Capital_Recovery_Period'])
+                gens = gens.loc[:, ~gens.columns.duplicated()]
+
                 gens["Lifetime"] = gens["Capital_Recovery_Period"]
                 gens.loc[
                     (gens["Lifetime"] == 0) | (gens["Lifetime"].isna()), "Lifetime"
