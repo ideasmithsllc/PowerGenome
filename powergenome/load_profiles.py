@@ -843,7 +843,7 @@ def make_distributed_gen_profiles(pg_engine, settings):
             )
 
     if len(dg_hourly_gen) == 8784:
-        remove_feb_29(dg_hourly_gen)
+        dg_hourly_gen = remove_feb_29(dg_hourly_gen)
 
     return dg_hourly_gen
 
