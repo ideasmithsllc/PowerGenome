@@ -110,6 +110,7 @@ def fetch_atb_costs(
     # add_pv_wacc = True
     cols = ["technology", "tech_detail", "financial_case", "cost_case", "atb_year"]
     valid_inputs = db_col_values(pg_engine, "technology_costs_nrelatb", cols)
+
     for tech in techs + mod_techs:
         tech, tech_detail, cost_case, _ = tech
         # if tech == "UtilityPV":
@@ -132,7 +133,13 @@ def fetch_atb_costs(
             AND atb_year == {atb_year}
             AND parameter IN ({','.join('?'*len(cost_params))})
         """
-        all_rows.extend(pg_engine.execute(s, cost_params).fetchall())
+        rows = pg_engine.execute(s, cost_params).fetchall()
+        if len(rows) == 0:
+            raise ValueError(
+                f"ATB costs query came up empty: \n{s}"
+                f"\n where the '?' are set to {cost_params}"
+            )
+        all_rows.extend(rows)
 
         if (tech, cost_case) not in tech_list:
             # ATB2020 summary file provides a single WACC for each technology and a single
@@ -967,6 +974,10 @@ def single_generator_row(
         & (atb_costs_hr["basis_year"].isin(model_year_range)),
         numeric_cols,
     ].mean()
+    if all(s.isna()):
+        raise ValueError(
+            f"No {numeric_cols} found for {technology} {cost_case} in years {model_year_range}"
+        )
     cols = ["technology", "cost_case", "tech_detail"] + numeric_cols
     row = pd.DataFrame([technology, cost_case, tech_detail] + s.to_list(), index=cols).T
 
@@ -1121,18 +1132,13 @@ def atb_new_generators(atb_costs, atb_hr, settings, cluster_builder=None):
     logger.debug("Creating new resources for each region.")
     new_gen_types = settings["atb_new_gen"]
     model_year = settings["model_year"]
-    try:
-        first_planning_year = settings["model_first_planning_year"]
-        model_year_range = range(first_planning_year, model_year + 1)
-    except KeyError:
-        model_year_range = list(range(model_year + 1))
-
+    first_planning_year = settings["model_first_planning_year"]
+    model_year_range = range(first_planning_year, model_year + 1)
     regions = settings["model_regions"]
 
     atb_costs_hr = atb_costs.merge(
         atb_hr, on=["technology", "tech_detail", "cost_case", "basis_year"], how="left"
     )
-
     if new_gen_types:
         new_gen_df = pd.concat(
             [
