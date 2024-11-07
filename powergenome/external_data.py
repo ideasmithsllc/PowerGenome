@@ -224,7 +224,7 @@ def make_generator_variability(
     def profile_len(x: Any) -> int:
         if isinstance(x, (list, np.ndarray)):
             return len(x)
-        return 1
+        return 8760  # why was this value 1 before? was making default profile of length 1
 
     def format_profile(
         x: Any, remove_feb_29: bool = True, hours: int = 8760
@@ -242,6 +242,7 @@ def make_generator_variability(
         # Fill missing with default [1, ...]
         return np.ones(hours, dtype=float)
 
+    # TODO(nlaws) the "profile" defaults to NaNs somewhere. Better if it is not created
     if "profile" in df:
         hours = df["profile"].apply(profile_len).max()
         if remove_feb_29 and hours == 8784:
