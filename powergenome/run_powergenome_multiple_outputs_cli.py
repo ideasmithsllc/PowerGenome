@@ -327,7 +327,9 @@ def main(**kwargs):
                     )
 
                 gen_clusters["Zone"] = gen_clusters["region"].map(zone_num_map)
-                gen_clusters = add_misc_gen_values(gen_clusters, _settings)
+                # add_misc_gen_values adds values from misc_gen_inputs_fn
+                if "misc_gen_inputs_fn" in _settings:
+                    gen_clusters = add_misc_gen_values(gen_clusters, _settings)
                 gen_clusters = hydro_energy_to_power(
                     gen_clusters,
                     _settings.get("hydro_factor"),
@@ -337,6 +339,7 @@ def main(**kwargs):
                 gen_variability = make_generator_variability(gen_clusters)
                 gen_variability.index.name = "Time_Index"
                 gen_variability.columns = gen_clusters["Resource"]
+
                 if "MUST_RUN" in gen_clusters.columns:
                     gen_variability = set_must_run_generation(
                         gen_variability,
@@ -344,6 +347,7 @@ def main(**kwargs):
                             gen_clusters["MUST_RUN"] == 1, "Resource"
                         ].to_list(),
                     )
+
                 gens = fix_min_power_values(gen_clusters, gen_variability).pipe(
                     add_co2_costs_to_o_m
                 )
