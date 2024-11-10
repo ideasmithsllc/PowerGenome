@@ -146,10 +146,10 @@ def parse_command_line(argv):
     return arguments
 
 
-def setup_logger(out_folder):
+def setup_logger(out_folder, log_level=logging.INFO):
     # Create a logger to output any messages we might have...
     logger = logging.getLogger(powergenome.__name__)
-    logger.setLevel(logging.DEBUG)
+    logger.setLevel(log_level)
     handler = logging.StreamHandler()
     stream_formatter = logging.Formatter(
         # More extensive test-like formatter...
@@ -158,7 +158,7 @@ def setup_logger(out_folder):
         "%H:%M:%S",
     )
     handler.setFormatter(stream_formatter)
-    handler.setLevel(logging.INFO)
+    handler.setLevel(log_level)
     logger.addHandler(handler)
 
     file_formatter = logging.Formatter(
@@ -168,7 +168,7 @@ def setup_logger(out_folder):
         "%Y-%m-%d %H:%M:%S",
     )
     filehandler = logging.FileHandler(out_folder / "log.txt")
-    filehandler.setLevel(logging.DEBUG)
+    filehandler.setLevel(log_level)
     filehandler.setFormatter(file_formatter)
     logger.addHandler(filehandler)
     return logger
@@ -190,7 +190,6 @@ def main(**kwargs):
             "for multi-stage modeling in GenX."
         )
 
-    logger.info("Reading settings file")
     settings = load_settings(path=args.settings_file)
 
     # Copy the settings file to results folder
