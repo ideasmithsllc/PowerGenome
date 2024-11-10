@@ -3980,10 +3980,6 @@ class GeneratorClusters:
         ]
 
         self.all_resources = self.all_resources.reset_index(drop=True)
-        self.all_resources["variable_CF"] = 0.0
-        for i, p in enumerate(self.all_resources["profile"]):
-            if isinstance(p, (collections.abc.Sequence, np.ndarray)):
-                self.all_resources.loc[i, "variable_CF"] = np.mean(p)
 
         # Set Min_Power of wind/solar to 0
         if "VRE" in self.all_resources.columns:
