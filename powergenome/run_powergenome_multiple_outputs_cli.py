@@ -146,14 +146,7 @@ def parse_command_line(argv):
     return arguments
 
 
-def main(**kwargs):
-    args = parse_command_line(sys.argv)
-    args.__dict__.update(kwargs)
-    cwd = Path.cwd()
-
-    out_folder = cwd / args.results_folder
-    out_folder.mkdir(exist_ok=True)
-
+def setup_logger(out_folder):
     # Create a logger to output any messages we might have...
     logger = logging.getLogger(powergenome.__name__)
     logger.setLevel(logging.DEBUG)
@@ -178,6 +171,18 @@ def main(**kwargs):
     filehandler.setLevel(logging.DEBUG)
     filehandler.setFormatter(file_formatter)
     logger.addHandler(filehandler)
+    return logger
+
+
+def main(**kwargs):
+    args = parse_command_line(sys.argv)
+    args.__dict__.update(kwargs)
+    cwd = Path.cwd()
+
+    out_folder = cwd / args.results_folder
+    out_folder.mkdir(exist_ok=True)
+
+    logger = setup_logger(out_folder)
 
     if not args.multi_period:
         logger.info(
