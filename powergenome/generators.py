@@ -1727,6 +1727,7 @@ def load_860m(settings: dict) -> Dict[str, pd.DataFrame]:
     if not fn:
         fn = find_newest_860m()
 
+    logger.info(f"Using {fn} for 860m data.")
     fn_name = Path(fn).stem
 
     data_dict = {}
