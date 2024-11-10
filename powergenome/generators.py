@@ -1632,6 +1632,7 @@ def find_newest_860m() -> str:
         Name of most recently posted file
     """
     site_url = "https://www.eia.gov/electricity/data/eia860m/"
+    logger.info(f"Querying {site_url} fo infer the latest 860m file for generators.")
     r = requests.get(site_url)
     soup = BeautifulSoup(r.content, "lxml")
     table = soup.find("table", attrs={"class": "basic-table"})
