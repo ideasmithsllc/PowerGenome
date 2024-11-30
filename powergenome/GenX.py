@@ -575,12 +575,15 @@ def network_reinforcement_cost(
             "capex_mw_mile.<model_region>. See the `test_settings.yml` file for an "
             "example."
         )
-    origin_region_cost = (
-        transmission["transmission_path_name"].str.split("_to_").str[0].map(cost_dict)
-    )
-    dest_region_cost = (
-        transmission["transmission_path_name"].str.split("_to_").str[-1].map(cost_dict)
-    )
+    origins = transmission["transmission_path_name"].str.split("_to_").str[0]
+    destinations = transmission["transmission_path_name"].str.split("_to_").str[-1]
+    all_points = set(origins.unique().tolist() + destinations.unique().tolist())
+    missing_regions = all_points - set(cost_dict.keys())
+    if missing_regions:
+        raise ValueError(f"Missing capex_mw_mile for some regions: {missing_regions}")
+
+    origin_region_cost = origins.map(cost_dict)
+    dest_region_cost = destinations.map(cost_dict)
 
     # Average the costs per mile between origin and destination regions
     line_capex = (origin_region_cost + dest_region_cost) / 2
